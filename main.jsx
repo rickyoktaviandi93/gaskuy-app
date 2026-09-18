@@ -1,0 +1,3 @@
+import React,{useEffect,useState}from'react';import{createRoot}from'react-dom/client';import'./style.css';
+const API='https://API-DOMAIN-ANDA/api/v1';
+function App(){const[d,setD]=useState(null);useEffect(()=>{fetch(API+'/admin/dashboard').then(r=>r.json()).then(setD).catch(()=>setD({error:'Konfigurasi API/domain belum diisi'}))},[]);return <main><h1>GasKuy Admin</h1><p>Dashboard operasional</p>{d?.error?<div className="card">{d.error}</div>:<section><div className="card"><b>Users</b><strong>{d?.users??'-'}</strong></div><div className="card"><b>Drivers</b><strong>{d?.drivers??'-'}</strong></div><div className="card"><b>Orders</b><strong>{d?.orders??'-'}</strong></div></section>}</main>}createRoot(document.getElementById('root')).render(<App/>);

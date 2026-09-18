@@ -1,0 +1,1 @@
+body{font-family:system-ui;margin:0;background:#f5f5f5;color:#222}main{max-width:900px;margin:40px auto;padding:20px}section{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:white;border-radius:14px;padding:22px;box-shadow:0 2px 10px #ddd}.card strong{display:block;font-size:32px;margin-top:8px}@media(max-width:650px){section{grid-template-columns:1fr}}

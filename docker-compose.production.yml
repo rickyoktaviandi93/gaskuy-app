@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gaskuy
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [gaskuy]
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    depends_on: [postgres]
+    networks: [gaskuy]
+    ports: ["3000:3000"]
+networks: {gaskuy: {}}
+volumes: {pgdata: {}}

@@ -1,0 +1,4 @@
+import {Router} from 'express'; import {auth} from '../auth'; import {pool} from '../db';
+const r=Router();
+r.post('/',auth,async(req,res)=>{const {order_id,stars,comment}=req.body;if(!Number.isInteger(stars)||stars<1||stars>5)return res.status(400).json({message:'Rating 1-5'});const q=await pool.query(`SELECT driver_id,customer_id,status FROM orders WHERE id=$1 AND customer_id=$2`,[order_id,(req as any).user.sub]);if(!q.rows[0]||q.rows[0].status!=='COMPLETED')return res.status(400).json({message:'Order belum selesai'});try{await pool.query('INSERT INTO ratings(order_id,customer_id,driver_id,stars,comment) VALUES($1,$2,$3,$4,$5)',[order_id,(req as any).user.sub,q.rows[0].driver_id,stars,comment||null]);res.status(201).json({ok:true});}catch{res.status(409).json({message:'Order sudah diberi rating'});}});
+export default r;
