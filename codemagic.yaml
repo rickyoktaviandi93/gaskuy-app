@@ -8,6 +8,14 @@ workflows:
       flutter: stable
 
     scripts:
+      - name: Prepare Flutter project
+        script: |
+          mkdir -p lib/services
+          cp main.dart lib/main.dart
+          cp config.dart lib/config.dart
+          cp api.dart lib/services/api.dart
+          flutter create --platforms=android .
+
       - name: Get Flutter packages
         script: |
           flutter pub get
