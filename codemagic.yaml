@@ -10,13 +10,11 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          cd customer_app
           flutter pub get
 
       - name: Build GasKuy APK
         script: |
-          cd customer_app
           flutter build apk --release
 
     artifacts:
-      - customer_app/build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/flutter-apk/app-release.apk
