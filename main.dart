@@ -1,1 +1,90 @@
-import 'package:flutter/material.dart';import 'package:geolocator/geolocator.dart';import 'services/api.dart';void main()=>runApp(const App());class App extends StatefulWidget{const App({super.key});State<App>createState()=>_A();}class _A extends State<App>{bool online=false;String info='Offline';Future<void>toggle(bool v)async{setState(()=>online=v);if(v){await Geolocator.requestPermission();final p=await Geolocator.getCurrentPosition();await Api().post('/drivers/online',{});await Api().put('/drivers/location',{'lat':p.latitude,'lng':p.longitude});setState(()=>info='Online • lokasi terkirim');}else{await Api().post('/drivers/offline',{});setState(()=>info='Offline');}}Widget build(BuildContext c)=>MaterialApp(debugShowCheckedModeBanner:false,home:Scaffold(appBar:AppBar(title:const Text('GasKuy Driver')),body:Padding(padding:const EdgeInsets.all(20),child:Column(children:[SwitchListTile(title:const Text('Terima order'),value:online,onChanged:toggle),Text(info),const SizedBox(height:20),const Card(child:ListTile(title:Text('Order masuk'),subtitle:Text('Order akan tampil di sini')))])));}}
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'services/api.dart';
+
+void main() {
+  runApp(const App());
+}
+
+class App extends StatefulWidget {
+  const App({super.key});
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  bool online = false;
+  String info = 'Offline';
+
+  Future<void> toggle(bool value) async {
+    setState(() {
+      online = value;
+    });
+
+    try {
+      if (value) {
+        await Geolocator.requestPermission();
+
+        final position =
+            await Geolocator.getCurrentPosition();
+
+        await Api().post('/drivers/online', {});
+
+        await Api().put('/drivers/location', {
+          'lat': position.latitude,
+          'lng': position.longitude,
+        });
+
+        setState(() {
+          info = 'Online • lokasi terkirim';
+        });
+      } else {
+        await Api().post('/drivers/offline', {});
+
+        setState(() {
+          info = 'Offline';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        online = false;
+        info = 'Gagal terhubung ke server';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('GasKuy Driver'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              SwitchListTile(
+                title: const Text('Terima order'),
+                value: online,
+                onChanged: toggle,
+              ),
+              Text(info),
+              const SizedBox(height: 20),
+              const Card(
+                child: ListTile(
+                  title: Text('Order masuk'),
+                  subtitle: Text(
+                    'Order akan tampil di sini',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
