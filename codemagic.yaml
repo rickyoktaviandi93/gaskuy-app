@@ -22,7 +22,7 @@ workflows:
 
       - name: Build GasKuy APK
         script: |
-          flutter build apk --debug
+          flutter build apk --debug --split-per-abi
 
     artifacts:
-      - build/app/outputs/flutter-apk/app-debug.apk
+      - build/app/outputs/flutter-apk/*-arm64-v8a-debug.apk
