@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("./auth");
+const db_1 = require("./db");
+const realtime_1 = require("./realtime");
+const r = (0, express_1.Router)();
+r.post('/', auth_1.auth, async (req, res) => { const b = req.body; if (!b.pickup_address || !b.destination_address)
+    return res.status(400).json({ message: 'Lokasi wajib' }); const d = await db_1.pool.query(`SELECT ST_Distance(ST_SetSRID(ST_MakePoint($1,$2),4326)::geography,ST_SetSRID(ST_MakePoint($3,$4),4326)::geography)/1000 km`, [b.pickup_lng, b.pickup_lat, b.destination_lng, b.destination_lat]); const km = Number(d.rows[0].km); const t = (await db_1.pool.query('SELECT * FROM tariffs WHERE active=true LIMIT 1')).rows[0]; const fare = Math.max(Number(t.minimum_fare), Number(t.base_fare) + km * Number(t.price_per_km) + Number(t.service_fee)); const q = await db_1.pool.query(`INSERT INTO orders(customer_id,pickup_address,destination_address,pickup_location,destination_location,distance_km,estimated_fare) VALUES($1,$2,$3,ST_SetSRID(ST_MakePoint($4,$5),4326)::geography,ST_SetSRID(ST_MakePoint($6,$7),4326)::geography,$8,$9) RETURNING *`, [req.user.sub, b.pickup_address, b.destination_address, b.pickup_lng, b.pickup_lat, b.destination_lng, b.destination_lat, km, fare]); const o = q.rows[0]; await db_1.pool.query('INSERT INTO order_status_history(order_id,status) VALUES($1,$2)', [o.id, o.status]); (0, realtime_1.emit)('order:created', o); res.status(201).json({ order: o }); });
+r.get('/:id', auth_1.auth, async (req, res) => { const q = await db_1.pool.query('SELECT o.*,u.name driver_name,u.phone driver_phone FROM orders o LEFT JOIN users u ON u.id=o.driver_id WHERE o.id=$1 AND (o.customer_id=$2 OR o.driver_id=$2)', [req.params.id, req.user.sub]); if (!q.rows[0])
+    return res.status(404).json({ message: 'Not found' }); res.json({ order: q.rows[0] }); });
+exports.default = r;
